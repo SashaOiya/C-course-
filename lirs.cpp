@@ -38,8 +38,9 @@ struct cache_s {
         std::list<list_data_s *> hir_list    = {};
         std::unordered_map< int, list_data_s *> cache_hash_table  = {}; // not only int
         size_t lir_size = 0;
-        size_t hir_size = 0;
+        size_t hir_size = 0; //
         size_t capacity = 0;
+        size_t currennt_lir_n = 0;
         std::hash<int> hash_int; // int ?
 }; 
 
@@ -103,7 +104,7 @@ $           list_data_s *temp_list_elem = (list_data_s *)calloc ( sizeof (list_d
             cache->cache_hash_table.try_emplace ( temp_list_elem->data, temp_list_elem );
             Clear_Hir_List ( cache );
             //Clear_Cache_List ( cache );
-
+                                        // ????????
             temp_list_elem->location = ( cache->cache_list.size() == 0 ) ? INF : cache->cache_list.size() ;
         }
         else {
@@ -134,6 +135,7 @@ $                   hash_elem_pointer->IRR = INF;
                     hash_elem_pointer->IRR=(hash_elem_pointer->location == INF) ? INF : fabs(cache->cache_list.size()-hash_elem_pointer->location ); 
                     if ( ( hash_elem_pointer->IRR < cache->cache_list.size() ) && ( hash_elem_pointer->location != INF )  ) {
 $                       hash_elem_pointer->type = LIR;
+                        ++(cache->currennt_lir_n);
                         cache->hir_list.remove ( hash_elem_pointer );
 
                         if ( cache->cache_list.size() > 1 ) { /// aaaaaaaaaaa
@@ -154,14 +156,19 @@ $                       hash_elem_pointer->type = LIR;
             else if ( elem_type == HIR_NO_RESIDENT ) {
  $              hash_elem_pointer->IRR=(hash_elem_pointer->location == INF) ? INF : fabs(cache->cache_list.size()-hash_elem_pointer->location ); 
                 hash_elem_pointer->type = LIR;
+                ++(cache->currennt_lir_n);
                 hash_elem_pointer->place_in_cache_list = true; // added
 
                 if ( cache->cache_list.size() > 1 ) {
                     cache->cache_list.remove ( hash_elem_pointer );
                     cache->cache_list.push_front ( hash_elem_pointer );
-
-                    cache->cache_list.back()->type = HIR_RESIDENT;
-                    cache->hir_list.push_front ( cache->cache_list.back() );
+                    
+                    assert ( cache->currennt_lir_n <= cache->lir_size + 1 );
+                    if ( cache->currennt_lir_n == cache->lir_size + 1 ) {
+ $                      cache->cache_list.back()->type = HIR_RESIDENT; //
+                        --(cache->currennt_lir_n);
+                        cache->hir_list.push_front ( cache->cache_list.back() );
+                    }
                 }
                 Clear_Hir_List ( cache );
                 Clear_Cache_List ( cache );
