@@ -1,5 +1,12 @@
 #include "lirs.h"
 
+// file
+// free
+// hir size
+// &
+// out
+// max size unordered map
+
 //#define DEBUG
 
 errors Get_Elem ( cache_s *cache );
@@ -33,6 +40,8 @@ void Cache_Ctor ( cache_s *cache ) // return errors
 
     std::cin >> cache->lir_size >> cache->hir_size >>cache->elements_number;
     //assert ( cache_size > 0 ); // = 0
+
+    cache->cache_hash_table.reserve ( cache->elements_number );
 
     //if ( cache _size  )
     //cache->capacity = cache->lir_size + cache->hir_size;
@@ -70,7 +79,7 @@ int Cache_Processing ( cache_s *cache, list_data_s *hash_elem_pointer, const int
     assert ( cache != nullptr );
 
     if ( hash_elem_pointer == nullptr ) {
-$       list_data_s *temp_list_elem = (list_data_s *)calloc ( sizeof (list_data_s) * 1, 1 ); 
+$       list_data_s *temp_list_elem = (list_data_s *)calloc ( sizeof (list_data_s) * 1, 1 ); // name???????
         // errors
         // not forget clean
 
