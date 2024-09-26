@@ -1,6 +1,6 @@
 #include "ideal.h"
 
-//#define DEBUG
+#define NDEBUG
 
 #ifdef DEBUG
 #define $ std::cout<< __LINE__  << '\t' << __FUNCTION__ << '\n';
@@ -11,12 +11,16 @@
 int main ( int argc, char* argv[] ) 
 {
     cache_s cache = {};
+    unsigned int start_time =  clock();
 
     Cache_Ctor ( &cache, (argc > 1) ? argv[1] : nullptr );
 
     size_t output = cache.emements_number - Cache_Processing ( &cache );
+    unsigned int end_time = clock();
     std::cout << output << '\n';
 $
+    unsigned int search_time = end_time - start_time;
+    printf ( "Successfully. Time = %d s \n", search_time / 1000 );
     Cache_Dtor ( &cache );
 $
     return 0;
@@ -33,17 +37,19 @@ errors Cache_Ctor ( cache_s *cache, const char *file_name )
         return READ_FILE_ERR; 
     }
 
-    file >> cache->capacity;
-    file >> cache->emements_number;
+    file >> cache->capacity >> cache->emements_number;
     cache->data_vector.reserve ( cache->emements_number );
+    cache->data_hash_table.reserve ( cache->emements_number );
+    cache->cache_hash_table.reserve ( cache->capacity );
+    assert ( cache->cache_list.max_size() > cache->capacity );
 $
-    for ( int i = 0; i < cache->emements_number; ++i ) {
+    int elem_number = cache->emements_number;
+    for ( int i = 0; i < elem_number; ++i ) {
         int new_element = 0;
         file >> new_element;
         list_data_s *element_pointer = Find_Elem_Hash_Table ( cache, cache->data_hash_table, new_element );
         if ( element_pointer == nullptr ) {
-            element_pointer = (list_data_s *)calloc ( sizeof (list_data_s) * 1, 1 ); 
-            // free
+            element_pointer = (list_data_s *)calloc ( sizeof (list_data_s) * 1, 1 ); // ????
             assert ( element_pointer != nullptr );
             element_pointer->data = new_element;
 $
