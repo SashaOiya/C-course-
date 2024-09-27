@@ -15,22 +15,16 @@ int main ( int argc, char* argv[] )
 
     Cache_Ctor ( cache, (argc > 1) ? argv[1] : nullptr );
     //Print_Vector ( *( Find_Elem_Hash_Table ( cache, 11119 )) );
-    size_t output = Filling_Cache ( cache );
     //Print_List_Typo ( cache );
-    output = cache.emements_number - Cache_Processing ( cache ) - output;
+    size_t output = cache.emements_number - Cache_Processing ( cache );
     std::cout << output << '\n';
 
     unsigned int end_time = clock();
     unsigned int search_time = end_time - start_time;
     printf ( "Successfully. Time = %d s \n", search_time / 1000 );
-
-    /*size_t output = cache.emements_number - Cache_Processing ( &cache );
-    unsigned int end_time = clock();
     std::cout << output << '\n';
-$
-    unsigned int search_time = end_time - start_time;
-    printf ( "Successfully. Time = %d s \n", search_time / 1000 );
-    Cache_Dtor ( &cache ); */
+
+    //Cache_Dtor ( cache ); 
 $
     return 0;
 }
@@ -161,6 +155,7 @@ int Cache_Processing ( cache_s &cache )
 $
     size_t elem_n = cache.data_vector.size();
     for ( int i = 0; i < elem_n; ++i ) {
+        Print_List_Typo ( cache );
         // get next elem
         int element = cache.data_vector.front();  // +
         cache.data_vector.erase ( cache.data_vector.begin() );
@@ -186,6 +181,10 @@ $
         if ( irr == -1 ) {
             // search max irr
             int max_irr_element = max_element(cache.cache_hash_table.begin(), cache.cache_hash_table.end(), compare)->first; 
+            if ( max_irr_element < element_irr ) {
+                ++misses_total_n;
+                continue;
+            }
             // delete its
             cache.cache_list.remove( max_irr_element );
             cache.cache_hash_table.erase( cache.cache_hash_table.find ( max_irr_element ) ); // why
@@ -201,7 +200,6 @@ $
         else {
             cache.cache_hash_table[element] = element_irr;
         }
-        // else found save new irr
     }
 
     return misses_total_n;
@@ -237,7 +235,7 @@ void Print_Vector ( std::vector<int> &data )
 $
 }
 
-void Print_List_Typo ( cache_s &cache )
+void Print_List_Typo ( cache_s cache )
 {
     size_t start_size = cache.cache_list.size();
 
