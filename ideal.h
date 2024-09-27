@@ -46,8 +46,8 @@ std::vector<int> *Find_Elem_Hash_Table ( cache_s &cache, int desired_elem );
 int Find_IRR_Hash_Table ( cache_s &cache, int desired_elem );
 size_t Filling_Cache ( cache_s &cache ) ;
 void Print_List_Typo ( cache_s &cache );
+int Cache_Processing ( cache_s &cache );
 /*
-int Cache_Processing ( cache_s *cache );
 bool compare(const std::pair<int, list_data_s *>&a, const std::pair<int, list_data_s *>&b);
 std::vector<int> *Find_Elem_Hash_Table ( cache_s &cache, int desired_elem );
 void Cache_Dtor ( cache_s *cache );*/

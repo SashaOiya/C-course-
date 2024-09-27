@@ -15,8 +15,10 @@ int main ( int argc, char* argv[] )
 
     Cache_Ctor ( cache, (argc > 1) ? argv[1] : nullptr );
     //Print_Vector ( *( Find_Elem_Hash_Table ( cache, 11119 )) );
-    Filling_Cache ( cache );
+    size_t output = Filling_Cache ( cache );
     //Print_List_Typo ( cache );
+    output = cache.emements_number - Cache_Processing ( cache ) - output;
+    std::cout << output << '\n';
 
     unsigned int end_time = clock();
     unsigned int search_time = end_time - start_time;
@@ -112,82 +114,101 @@ size_t Filling_Cache ( cache_s &cache )
 
         // get irr
         std::vector<int> *element_pointer = Find_Elem_Hash_Table ( cache, element ); 
+        int element_irr = Find_IRR_Hash_Table ( cache, element );
         assert ( element_pointer != nullptr );
         assert ( element_pointer->size() >= 1 );
-        if ( element_pointer->size() == 1 ) {
+        if ( ( element_pointer->size() == 1 ) && ( element_irr == -1 ) ) {
             element_pointer->erase( element_pointer->begin() );
-            cache.data_hash_table.erase ( cache.data_hash_table.find ( element ) ); 
+            cache.data_hash_table.erase ( cache.data_hash_table.find ( element ) );
+            ++misses_number; 
             --i;
-
+$
             continue;
             std::cout << "ERROR FILLING CACHE" << '\n'; //
         }
-        size_t element_irr = (*element_pointer)[1] - (*element_pointer)[0] - 1; 
+        size_t new_element_irr = (*element_pointer)[1] - (*element_pointer)[0] - 1; //
         element_pointer->erase( element_pointer->begin() ); // place
         //std::cout << "IRR   " << element_irr << "   DATA   " << element << '\n';
 $
         // filling cache ( list, hash table, map )
-        if ( Find_IRR_Hash_Table ( cache, element ) < 0 ) { // thiiis
+        if ( element_irr == -1 ) { // thiiis
             cache.cache_list.push_front ( element );
-            cache.cache_hash_table.emplace ( element, element_irr );
+            cache.cache_hash_table.emplace ( element, new_element_irr );
             assert ( Find_IRR_Hash_Table ( cache, element ) != -1 );
 
             ++misses_number;
         }
-        else { --i; }
+        else { 
+            cache.cache_hash_table[element] = new_element_irr;
+            --i;
+        }
         //element_pointer->current_irr = element_irr;
     }
 
     return misses_number;
 }
 
-/*bool compare(const std::pair<int, list_data_s *>&a, const std::pair<int, list_data_s *>&b)
+                            // T, int
+bool compare ( const std::pair<int, int> &a, const std::pair<int, int> &b )
 {
-   return a.second->current_irr < b.second->current_irr;
+   return a.second < b.second;
 }
 
-int Cache_Processing ( cache_s *cache )
+int Cache_Processing ( cache_s &cache )
 {
-    assert ( cache != nullptr );
-
     // add first data in cache_list
     size_t misses_total_n = Filling_Cache ( cache ); 
 $
-    size_t elem_n = cache->data_vector.size();
+    size_t elem_n = cache.data_vector.size();
     for ( int i = 0; i < elem_n; ++i ) {
         // get next elem
-        int element = cache->data_vector.front(); 
-        cache->data_vector.erase ( cache->data_vector.begin() );
+        int element = cache.data_vector.front();  // +
+        cache.data_vector.erase ( cache.data_vector.begin() );
 $
-        // count its irr
-        list_data_s *element_pointer = Find_Elem_Hash_Table ( cache, cache->data_hash_table, element ); 
-        assert ( element_pointer != nullptr );
-        size_t element_irr=(element_pointer->cells.size()>1) ? element_pointer->cells[1]-element_pointer->cells[0]-1 : element_irr=cache->data_vector.size()+1; 
-        element_pointer->cells.erase( element_pointer->cells.begin() );
-        element_pointer->current_irr = element_irr;
+        // get irr
+        std::vector<int> *element_vector_pointer = Find_Elem_Hash_Table ( cache, element ); 
+        int irr = Find_IRR_Hash_Table ( cache, element );
+        assert ( element_vector_pointer != nullptr );
+        assert ( element_vector_pointer->size() >= 1 );
+        if ( ( element_vector_pointer->size() == 1 ) && ( irr == -1 ) ) {
+            element_vector_pointer->erase( element_vector_pointer->begin() );
+            cache.data_hash_table.erase ( cache.data_hash_table.find ( element ) ); 
+            
+            ++misses_total_n;
 
-        if ( Find_Elem_Hash_Table ( cache, cache->cache_hash_table, element ) == nullptr ) {
+            continue;
+            std::cout << "ERROR FILLING CACHE" << '\n'; //
+        }
+        size_t element_irr = (*element_vector_pointer)[1] - (*element_vector_pointer)[0] - 1; //
+        element_vector_pointer->erase( element_vector_pointer->begin() ); // place
+        //element_pointer->current_irr = element_irr;
+
+        if ( irr == -1 ) {
             // search max irr
-            list_data_s * max_element_pointer = max_element(cache->cache_hash_table.begin(), cache->cache_hash_table.end(), compare)->second; 
+            int max_irr_element = max_element(cache.cache_hash_table.begin(), cache.cache_hash_table.end(), compare)->first; 
             // delete its
-            cache->cache_list.remove( max_element_pointer);
-            cache->cache_hash_table.erase( cache->cache_hash_table.find ( max_element_pointer->data ) );
-            assert ( Find_Elem_Hash_Table ( cache, cache->cache_hash_table, element ) == nullptr ); //
+            cache.cache_list.remove( max_irr_element );
+            cache.cache_hash_table.erase( cache.cache_hash_table.find ( max_irr_element ) ); // why
+            assert ( Find_IRR_Hash_Table ( cache, element ) == -1 ); //
 $
             // insert in cache_list one
-            cache->cache_list.push_front ( element_pointer );
-            cache->cache_hash_table.emplace ( element_pointer->data, element_pointer );
-            assert ( Find_Elem_Hash_Table ( cache, cache->cache_hash_table, element_pointer->data ) != nullptr );
+            cache.cache_list.push_front ( element );
+            cache.cache_hash_table.emplace ( element, element_irr );
+            assert ( Find_IRR_Hash_Table ( cache, element ) != -1 );
 
             ++misses_total_n;
         }
+        else {
+            cache.cache_hash_table[element] = element_irr;
+        }
+        // else found save new irr
     }
 
     return misses_total_n;
 }
 
 
-void Cache_Dtor ( cache_s *cache )
+/*void Cache_Dtor ( cache_s *cache )
 {
     assert ( cache != nullptr );
     assert ( cache->data_vector.size() == 0 );
@@ -203,8 +224,8 @@ $
     cache->emements_number = 0;
 
     return;
-} 
-*/
+} */
+
 
 void Print_Vector ( std::vector<int> &data )
 {
