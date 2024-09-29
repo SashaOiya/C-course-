@@ -14,7 +14,7 @@ int main ( int argc, char* argv[] )
     unsigned int end_time = clock();
     std::cout << cache.elements_number - output << '\n';
 
-    Print_List_Typo ( cache );
+    //Print_List_Typo ( cache );
     printf ( "Successfully. Time = %d s \n", ( end_time - start_time ) / 1000 );
 
     return 0;
@@ -199,9 +199,9 @@ $   size_t const current_hir_list_size = cache.hir_list.size ();
     assert ( current_hir_list_size <= cache.hir_size + SINGLE_CACHE_SIZE );
 
     if ( current_hir_list_size == cache.hir_size + SINGLE_CACHE_SIZE ) {
-        list_data_s *no_resident_hir_pointer = Find_Elem_Hash_Table ( cache, cache.hir_list.back() );
+        list_data_s *no_resident_hir_pointer = Find_Elem_Hash_Table ( cache, cache.hir_list.front() );
  $      //list_data_s no_resident_hir = cache.hir_list.back();
-        cache.hir_list.pop_back ();
+        cache.hir_list.pop_front ();
         // iterator ??
         
         //list_data_s *no_resident_hir_pointer = Find_Elem_Hash_Table ( cache, no_resident_hir->data );
