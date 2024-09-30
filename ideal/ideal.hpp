@@ -76,7 +76,7 @@ $           element_pointer->push_back ( i );
 
     void output ( Cache_c<T> cache, int output, std::string input_file_name ) 
     {
-        std::ofstream out ( "../test/comparison.txt", std::ios::app ); // ../
+        std::ofstream out ( "../../test/comparison.txt", std::ios::app ); 
         if ( !out ) {
 
             return ; 
