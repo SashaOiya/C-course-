@@ -1,18 +1,15 @@
-#include "lirs.h"
-
-#define NDEBUG
+#include "lirs.hpp"
 
 int main ( int argc, char* argv[] )
 {
-    unsigned int start_time =  clock();
-
+    //unsigned int start_time =  clock();
     Cache_c<int> cache;
-    int output = cache.cache_ctor ( cache, (argc > 1) ? argv[1] : nullptr );
+    int output = cache.cache_ctor ( cache, (argc > 1) ? argv[1] : "" );
     
-    unsigned int end_time = clock();
+    //unsigned int end_time = clock();
+    //printf ( "Successfully. Time = %d s \n", ( end_time - start_time ) / 1000 );
 
-    std::cout << "OUTPU : " << output << '\n';
-    printf ( "Successfully. Time = %d s \n", ( end_time - start_time ) / 1000 );
+    std::cout << output << '\n';
 
     return 0;
 }

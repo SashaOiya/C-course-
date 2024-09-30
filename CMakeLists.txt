@@ -1,18 +1,20 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(ideal)
+project("lirs_cache")
 
 set(SOURCES
-        ideal.cpp
+        lirs.cpp
 )
 set (HEADERS
-        ideal.h
+        lirs.hpp
 )
 
-add_executable(ideal ${SOURCES} ${HEADERS})
+add_executable(lirs ${SOURCES} ${HEADERS})
+
+option(MyOption "MyOption" OFF)
 
 set_target_properties(
-        ideal PROPERTIES 
+        lirs PROPERTIES 
         CXX_STANDART 20
         CXX_STANDARD_REQUIRED ON
 )
