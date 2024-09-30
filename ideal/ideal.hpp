@@ -74,6 +74,17 @@ $           element_pointer->push_back ( i );
         return NO_ERRORS;
     }
 
+    void output ( Cache_c<T> cache, int output, std::string input_file_name ) 
+    {
+        std::ofstream out ( "../test/comparison.txt", std::ios::app ); // ../
+        if ( !out ) {
+
+            return ; 
+        }
+        out << "IDEAL. Test " << input_file_name << " OUT: " << output << std::endl;
+        out.close();
+    }
+
     void print_list ( Cache_c<T> cache )
     {
         size_t start_size = cache.cache_list.size();

@@ -53,7 +53,7 @@ private:
     std::hash<T> hash_func; 
 
 public:
-    int cache_ctor ( Cache_c<T> &cache, std::string file_name) 
+    int cache_ctor ( Cache_c<T> &cache, std::string file_name ) 
     {
         std::ifstream file ( file_name );
         if ( !file ) {
@@ -76,6 +76,17 @@ $           list_data_s <T>*hash_elem_pointer = cache.find_elem_hash_table ( cac
         file.close();
 
         return cache.elements_number - output;
+    }
+
+    void output ( Cache_c<T> cache, int output, std::string input_file_name ) 
+    {
+        std::ofstream out ( "../../test/comparison.txt", std::ios::app ); 
+        if ( !out ) {
+
+            return ; 
+        }
+        out << "LIRS. Test " << input_file_name << " OUT: " << output << std::endl;
+        out.close();
     }
 
     void print_list ( Cache_c<T> cache )

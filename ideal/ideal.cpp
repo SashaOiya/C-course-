@@ -11,7 +11,7 @@ int main ( int argc, char* argv[] )
         return EXIT_FAILURE;
     }
     size_t output = cache.cache_processing ( cache );
-    std::cout << output << '\n';
+    cache.output ( cache, output, argv[1] );
 
     //unsigned int end_time = clock();
     //unsigned int search_time = end_time - start_time;

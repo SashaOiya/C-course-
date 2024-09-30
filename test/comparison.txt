@@ -1,0 +1,19 @@
+
+LIRS. Test ../test/data.txt OUT: 2
+LIRS. Test ../test/data2.txt OUT: 5873
+LIRS. Test ../test/data3.txt OUT: 59421
+LIRS. Test ../test/data4.txt OUT: 2
+LIRS. Test ../test/data5.txt OUT: 76862
+LIRS. Test ../test/data6.txt OUT: 112979
+LIRS. Test ../test/data7.txt OUT: 85124
+LIRS. Test ../test/data8.txt OUT: 71121
+
+
+IDEAL. Test ../test/data.txt OUT: 4
+IDEAL. Test ../test/data2.txt OUT: 6835
+IDEAL. Test ../test/data3.txt OUT: 52204
+IDEAL. Test ../test/data4.txt OUT: 3
+IDEAL. Test ../test/data5.txt OUT: 68966
+IDEAL. Test ../test/data6.txt OUT: 113501
+IDEAL. Test ../test/data7.txt OUT: 78253
+IDEAL. Test ../test/data8.txt OUT: 63540
