@@ -39,96 +39,83 @@ struct list_data_s {
     typename std::list<T>::iterator hir_iterator = {};
 };
 
-template <typename T>
+template <typename T, typename U>
 class Cache_c {
 private:
+    size_t capacity = 0;
+    size_t elements_number = 0;
     std::list<T> cache_list = {};   // hir_resident + hir_no_resident + lir
     std::list<T> hir_list    = {};  // only hir_resident
     std::unordered_map< T, list_data_s<T> > cache_hash_table  = {}; 
-    size_t capacity = 0;
     size_t lir_size = 0;
     size_t hir_size = 0; 
-    size_t elements_number = 0;
     size_t currennt_lir_n = 0;  // to control the size and trim the cache_list
     std::hash<T> hash_func; 
 
 public:
-    int cache_ctor ( Cache_c<T> &cache, std::string file_name ) 
+    Cache_c ( size_t capacity, size_t elements_number ) : capacity( capacity ), elements_number ( elements_number ) {};
+    int cache_ctor () 
     {
-        std::ifstream file ( file_name );
-        if ( !file ) {
-            std::cout<< "FILE NOT FOUNDED\n";
-
-            return INVALID_VALUE; 
-        }
-        file >> cache.capacity >> cache.elements_number;
-        cache.get_hir_lir_size( cache );
-        cache.cache_hash_table.reserve ( cache.elements_number );
+        get_hir_lir_size();
+        cache_hash_table.reserve ( elements_number );
 
         int output = 0;
-        for ( size_t i = 0; i < cache.elements_number; ++i ) {
+        for ( size_t i = 0; i < elements_number; ++i ) {
             T element = 0; 
-            file >> element;
+            std::cin >> element;
 
-$           list_data_s <T>*hash_elem_pointer = cache.find_elem_hash_table ( cache, element ); 
-            output += cache.cache_processing( cache, hash_elem_pointer, element );
+$           list_data_s <T>*hash_elem_pointer = find_elem_hash_table ( element ); 
+            output += cache_processing( hash_elem_pointer, element );
         }
-        file.close();
 
-        return cache.elements_number - output;
+        return elements_number - output;
     }
 
-    void output ( Cache_c<T> cache, int output, std::string input_file_name ) 
+    void output ( const int output ) 
     {
-        std::ofstream out ( "../../test/comparison.txt", std::ios::app ); 
-        if ( !out ) {
-
-            return ; 
-        }
-        out << "LIRS. Test " << input_file_name << " OUT: " << output << std::endl;
-        out.close();
+    std::cout << output << '\n';
     }
 
-    void print_list ( Cache_c<T> cache )
+    void print_list ( Cache_c<T, U> cache )
     {
         size_t start_size = cache.cache_list.size();
         for ( int i = 0; i < start_size; ++i ) {
-            std::cout << "Data cache : " << cache.cache_list.back() << " node_type : " << cache.find_elem_hash_table( cache, cache.cache_list.back() )->type << '\n';
+            std::cout << "Data cache : " << cache.cache_list.back() << " node_type : " << cache.find_elem_hash_table( cache.cache_list.back() )->type << '\n';
             cache.cache_list.pop_back();
         }
         start_size = cache.hir_list.size();
         for ( int i = 0; i < start_size; ++i ) {
-            std::cout << "Data hir : " << cache.hir_list.back() << " node_type : " << cache.find_elem_hash_table ( cache, cache.hir_list.back() )->type << '\n';
+            std::cout << "Data hir : " << cache.hir_list.back() << " node_type : " << cache.find_elem_hash_table ( cache.hir_list.back() )->type << '\n';
             cache.hir_list.pop_back();
         }
     }
 
 private:
-    void get_hir_lir_size ( Cache_c<T> &cache )
+    void get_hir_lir_size ()
     {
-        assert ( cache.capacity >= 0 );
-        if ( cache.capacity >= 10 ) { 
-            cache.hir_size = cache.capacity * 2 / 10;
-            cache.lir_size = cache.capacity - cache.hir_size;
+        assert ( capacity >= 0 );
+        if ( capacity >= 10 ) { 
+            hir_size = capacity * 2 / 10;
+            lir_size = capacity - hir_size;
         }
-        else if ( cache.capacity <= 2 ) {
-            cache.lir_size = cache.capacity / 2;
-            cache.hir_size = cache.capacity - cache.lir_size;
+        else if ( capacity <= 2 ) {
+            lir_size = capacity / 2;
+            hir_size = capacity - lir_size;
         } 
         else {
-            cache.hir_size = cache.capacity / 3;
-            cache.lir_size = cache.capacity - cache.hir_size;
+            hir_size = capacity / 3;
+            lir_size = capacity - hir_size;
         }
  $  }
 
-    int cache_processing ( Cache_c<T> &cache, list_data_s<T> *hash_elem_pointer, const T element ) 
+    int cache_processing ( list_data_s<T> *hash_elem_pointer, const T element ) 
     {
         if ( hash_elem_pointer == nullptr ) {
-            cache.cache_list.push_back ( element ); 
-            cache.hir_list.push_back ( element ); 
-$           list_data_s<T> temp_list_elem = {element, HIR_RESIDENT, true, --(cache.cache_list.end()), --(cache.hir_list.end())  };
-            cache.cache_hash_table.try_emplace ( element, temp_list_elem );
-            cache.clear_hir_list( cache ); 
+            cache_list.push_back ( element ); 
+            hir_list.push_back ( element ); 
+$           list_data_s<T> temp_list_elem = {element, HIR_RESIDENT, true, --(cache_list.end()), --(hir_list.end())  };
+            cache_hash_table.try_emplace ( element, temp_list_elem );
+            clear_hir_list(); 
 
             return 1; 
         }
@@ -141,64 +128,64 @@ $           list_data_s<T> temp_list_elem = {element, HIR_RESIDENT, true, --(cac
                 if ( hash_elem_pointer->place_in_cache_list == false ) {
 $                  hash_elem_pointer->place_in_cache_list = true;
 
-                    cache.cache_list.push_back ( hash_elem );
-                    hash_elem_pointer->cache_iterator = --( cache.cache_list.end() );
+                    cache_list.push_back ( hash_elem );
+                    hash_elem_pointer->cache_iterator = --( cache_list.end() );
 
-                    cache.hir_list.erase ( hash_elem_pointer->hir_iterator ); 
-                    cache.hir_list.push_back ( hash_elem );
-                    hash_elem_pointer->hir_iterator = --( cache.hir_list.end() );
+                    hir_list.erase ( hash_elem_pointer->hir_iterator ); 
+                    hir_list.push_back ( hash_elem );
+                    hash_elem_pointer->hir_iterator = --( hir_list.end() );
                 }
                 else {
 $                   hash_elem_pointer->type = LIR;
-                    ++(cache.currennt_lir_n);
+                    ++(currennt_lir_n);
 
-                    cache.hir_list.erase ( hash_elem_pointer->hir_iterator ); 
-                    cache.lir_size_control ( cache, hash_elem ); 
-                    hash_elem_pointer->place_in_cache_list = cache.cache_list.size();
+                    hir_list.erase ( hash_elem_pointer->hir_iterator ); 
+                    lir_size_control ( hash_elem ); 
+                    hash_elem_pointer->place_in_cache_list = cache_list.size();
                 }
             }
             else if ( elem_type == LIR ) {  
-$               cache.cache_list.erase ( hash_elem_pointer->cache_iterator ); 
-                cache.cache_list.push_back ( hash_elem );
-                hash_elem_pointer->cache_iterator = --( cache.cache_list.end() );
-                cache.clear_cache_list ( cache );
+$               cache_list.erase ( hash_elem_pointer->cache_iterator ); 
+                cache_list.push_back ( hash_elem );
+                hash_elem_pointer->cache_iterator = --( cache_list.end() );
+                clear_cache_list ();
             }  
             else if ( elem_type == HIR_NO_RESIDENT ) {
 $               hash_elem_pointer->type = LIR;
-                ++(cache.currennt_lir_n);
+                ++(currennt_lir_n);
                 hash_elem_pointer->place_in_cache_list = true;
 
-                cache.lir_size_control ( cache, hash_elem );
-                cache.clear_hir_list( cache );
+                lir_size_control ( hash_elem );
+                clear_hir_list();
             }
         }
         return 0;
     }
 
-    void lir_size_control ( Cache_c<T> &cache, const T element ) 
+    void lir_size_control ( const T element ) 
     {
-        if ( cache.cache_list.size() > SINGLE_CACHE_SIZE ) { 
-            list_data_s<T> *data_pointer = cache.find_elem_hash_table ( cache, element );
-            cache.cache_list.erase ( data_pointer->cache_iterator ); 
-            cache.cache_list.push_back ( element );
-            data_pointer->cache_iterator = --( cache.cache_list.end() );
+        if ( cache_list.size() > SINGLE_CACHE_SIZE ) { 
+            list_data_s<T> *data_pointer = find_elem_hash_table ( element );
+            cache_list.erase ( data_pointer->cache_iterator ); 
+            cache_list.push_back ( element );
+            data_pointer->cache_iterator = --( cache_list.end() );
 
-            assert ( cache.currennt_lir_n <= cache.lir_size + SINGLE_CACHE_SIZE );
-            if ( cache.currennt_lir_n == cache.lir_size + SINGLE_CACHE_SIZE ) {
-$               (cache.find_elem_hash_table ( cache, cache.cache_list.front() ))->type = HIR_RESIDENT; 
-                --(cache.currennt_lir_n);
-                cache.hir_list.push_back ( cache.cache_list.front() );
-                (cache.find_elem_hash_table ( cache, cache.cache_list.front() ))->hir_iterator = --( cache.hir_list.end() );
+            assert ( currennt_lir_n <= lir_size + SINGLE_CACHE_SIZE );
+            if ( currennt_lir_n == lir_size + SINGLE_CACHE_SIZE ) {
+$               find_elem_hash_table( cache_list.front() )->type = HIR_RESIDENT; 
+                --(currennt_lir_n);
+                hir_list.push_back ( cache_list.front() );
+                find_elem_hash_table( cache_list.front() )->hir_iterator = --( hir_list.end() );
             }
         }
-        cache.clear_cache_list( cache );
+        clear_cache_list();
     }
 
-    list_data_s<T> *find_elem_hash_table ( Cache_c<T> &cache, const T desired_elem )
+    list_data_s<T> *find_elem_hash_table ( const T desired_elem )
     {
-        const T hash = cache.hash_func ( desired_elem ); 
-        typename std::unordered_map <T, list_data_s<T> >::iterator elem_iterator = cache.cache_hash_table.find ( hash ); 
-        if ( elem_iterator == cache.cache_hash_table.end () ) {
+        const T hash = hash_func ( desired_elem ); 
+        typename std::unordered_map <T, list_data_s<T> >::iterator elem_iterator = cache_hash_table.find ( hash ); 
+        if ( elem_iterator == cache_hash_table.end () ) {
 $
             return nullptr; 
         }
@@ -206,28 +193,28 @@ $
         return &(elem_iterator->second);
     } 
 
-    void clear_cache_list ( Cache_c<T> &cache )
+    void clear_cache_list ()
     {
-        list_data_s<T> *hash_elem_pointer = cache.find_elem_hash_table ( cache, cache.cache_list.front() );
+        list_data_s<T> *hash_elem_pointer = find_elem_hash_table ( cache_list.front() );
         assert ( hash_elem_pointer != nullptr );
-        for ( ;( hash_elem_pointer->type ) != LIR; hash_elem_pointer = cache.find_elem_hash_table(cache, cache.cache_list.front()) ) {
+        for ( ;( hash_elem_pointer->type ) != LIR; hash_elem_pointer = find_elem_hash_table( cache_list.front()) ) {
 $           hash_elem_pointer->place_in_cache_list = false;
 
             if ( hash_elem_pointer->type == HIR_NO_RESIDENT ) {
                 hash_elem_pointer->type = NO_TYPE;
-                cache.cache_hash_table.erase( cache.cache_hash_table.find ( hash_elem_pointer->data ) );
+                cache_hash_table.erase( cache_hash_table.find ( hash_elem_pointer->data ) );
             }
-            cache.cache_list.erase ( hash_elem_pointer->cache_iterator );
+            cache_list.erase ( hash_elem_pointer->cache_iterator );
         }
     }
 
-    void clear_hir_list ( Cache_c<T> &cache )
+    void clear_hir_list ()
     {
-$       assert ( cache.hir_list.size () <= cache.hir_size + SINGLE_CACHE_SIZE );
+$       assert ( hir_list.size () <= hir_size + SINGLE_CACHE_SIZE );
 
-        if ( cache.hir_list.size () == cache.hir_size + SINGLE_CACHE_SIZE ) {
-            list_data_s<T> *no_resident_hir_pointer = cache.find_elem_hash_table( cache, cache.hir_list.front() );
-            cache.hir_list.pop_front ();
+        if ( hir_list.size () == hir_size + SINGLE_CACHE_SIZE ) {
+            list_data_s<T> *no_resident_hir_pointer = find_elem_hash_table( hir_list.front() );
+            hir_list.pop_front ();
             assert ( no_resident_hir_pointer != nullptr );
             
             if ( no_resident_hir_pointer->place_in_cache_list == true ) {
@@ -235,7 +222,7 @@ $               no_resident_hir_pointer->type = HIR_NO_RESIDENT;
             }
             else {
 $               no_resident_hir_pointer->type = NO_TYPE;
-                cache.cache_hash_table.erase( cache.cache_hash_table.find ( no_resident_hir_pointer->data ) );
+                cache_hash_table.erase( cache_hash_table.find ( no_resident_hir_pointer->data ) );
             }
         }
     }

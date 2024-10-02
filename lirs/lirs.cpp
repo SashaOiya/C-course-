@@ -2,16 +2,35 @@
 
 #define NDEBUG
 
-int main ( int argc, char* argv[] )
+int main ()
 {
     //unsigned int start_time =  clock();
-    Cache_c<int> cache;
-    int output = 0;
-    if ( ( output = cache.cache_ctor ( cache, (argc > 1) ? argv[1] : "" ) ) < 0 ) {
+    using key_type = int;
+    using page_type = key_type;
+
+    size_t capacity = 0;
+    std::cin >> capacity;
+    if ( !std::cin.good() ) {
+        std::cerr << "Error while reading the capacity of cache\n";
 
         return EXIT_FAILURE;
     }
-    cache.output ( cache, output, argv[1] );
+    
+    size_t elements_number = 0;
+    std::cin >> elements_number;
+    if ( !std::cin.good() ) {
+        std::cerr << "Error while reading the number of elements\n";
+
+        return EXIT_FAILURE;
+    }
+    Cache_c<key_type, page_type> cache {capacity, elements_number};
+
+    int output = 0;
+    if ( ( output = cache.cache_ctor () ) < 0 ) {
+
+        return EXIT_FAILURE;
+    }
+    cache.output ( output );
     
     //unsigned int end_time = clock();
     //printf ( "Successfully. Time = %d s \n", ( end_time - start_time ) / 1000 );
