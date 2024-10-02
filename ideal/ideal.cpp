@@ -2,7 +2,7 @@
 
 int main ( int argc, char* argv[] ) 
 {
-    //unsigned int start_time = clock();
+    unsigned int start_time = clock();
     using key_type = int;
     using page_type = key_type;
 
@@ -31,9 +31,9 @@ int main ( int argc, char* argv[] )
     size_t output = cache.cache_processing ();
     cache.output ( output );
 
-    //unsigned int end_time = clock();
-    //unsigned int search_time = end_time - start_time;
-    //printf ( "Successfully. Time = %d s \n", search_time / 1000 );
+    unsigned int end_time = clock();
+    unsigned int search_time = end_time - start_time;
+    printf ( "Successfully. Time = %d s \n", search_time / 1000 );
 $
     return 0;
 }
