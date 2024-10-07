@@ -12,14 +12,6 @@
 #include <vector>
 #include <list>
 
-#define NDEBUG
-
-#ifdef DEBUG
-#define $ std::cout<< __LINE__  << '\t' << __FUNCTION__ << '\n';
-#else
-#define $ ;
-#endif
-
 enum errors {
     NO_ERRORS = 0,
     CACHE_SIZE_ERR = 1,
@@ -31,7 +23,7 @@ class Cache_c {
     std::deque<T> data_vector = {};
                             // data, cells
     std::unordered_map< T, std::deque<int> > data_hash_table  = {};
-    std::vector<T> cache_list = {}; // name
+    std::vector<T> cache_storage = {}; 
                       // data, irr
     std::unordered_map< T, int> cache_hash_table = {}; 
 
@@ -45,8 +37,8 @@ public :
     errors reading_data () 
     {
         data_hash_table.reserve ( elements_number );
-        assert ( cache_list.max_size() > capacity );
-$
+        assert ( cache_storage.max_size() > capacity );
+
         for ( size_t i = 0; i < elements_number; ++i ) {
             T new_element = 0;
             std::cin >> new_element;
@@ -54,12 +46,12 @@ $
 
             if ( element_pointer == nullptr ) {
                 std::deque<int> cell = {}; 
-$               data_hash_table.emplace ( new_element, cell );
+                data_hash_table.emplace ( new_element, cell );
                 element_pointer = search_in_data_hash_table ( new_element );
             }
             assert ( element_pointer != nullptr);
 
-$           element_pointer->push_back ( i );
+            element_pointer->push_back ( i );
             data_vector.push_back ( new_element );
         }
 
@@ -76,56 +68,45 @@ $           element_pointer->push_back ( i );
     int cache_processing ()
     {
         size_t misses_total_n = 0;
-$
+
         for ( size_t i = 0, elem_n = data_vector.size(); ( i < elem_n ) && ( data_vector.size() ); ++i ) {
             // get next elem
-            T element = data_vector.front();  // list may be
+            T element = data_vector.front(); 
             data_vector.pop_front();
-$
+
             // get irr
             std::deque<int> *element_vector_pointer = search_in_data_hash_table ( element ); 
-            assert ( element_vector_pointer != nullptr );
-            int irr = search_in_cache_hash_table (element );
-            size_t element_recency = 0;
-            if ( irr == -1 ) { ++misses_total_n; }
+            auto irr = search_in_cache_hash_table (element );
+            size_t element_recency = 0; //
+            if ( irr == cache_hash_table.end() ) { ++misses_total_n; }
 
-            if (  ( element_vector_pointer->size() == 1 ) && ( irr == -1 ) ) {
+            if (  ( element_vector_pointer->size() == 1 ) && ( irr == cache_hash_table.end() ) ) {
                 element_vector_pointer->pop_front();
                 data_hash_table.erase ( data_hash_table.find ( element ) ); 
-                //++misses_total_n;
 
                 continue;
             }
-            else if ( element_vector_pointer->size() == 1 ) { element_recency = MAX_IRR; element_vector_pointer->pop_front(); }  
-            else {  
-                element_recency = (*element_vector_pointer)[1] - (*element_vector_pointer)[0] - 1; //
-                element_vector_pointer->pop_front(); //
-            }
+            element_recency = ( element_vector_pointer->size() == 1 ) ? MAX_IRR:(*element_vector_pointer)[1] - (*element_vector_pointer)[0] - 1; 
+            element_vector_pointer->pop_front();
 
-            if ( ( irr == -1 ) && ( cache_list.size() < capacity ) ) { 
-$               cache_list.push_back ( element );
+            if ( ( irr == cache_hash_table.end() ) && ( cache_storage.size() < capacity ) ) { 
+                cache_storage.push_back ( element );
                 cache_hash_table.emplace ( element, element_recency );
-                assert ( search_in_cache_hash_table ( element ) != -1 );
-
-                //++misses_total_n;
+                assert ( search_in_cache_hash_table ( element ) != cache_hash_table.end() );
             }
-            else if ( irr == -1 ) {
-                // search max irr
-                //++misses_total_n;
+            else if ( irr == cache_hash_table.end() ) {
                 T max_irr_element = get_element_with_max_recency ();
-$               size_t max_recency = search_in_cache_hash_table ( max_irr_element );
+                size_t max_recency = search_in_cache_hash_table( max_irr_element )->second;
                 if ( ( max_recency <= element_recency ) ) {
                     continue;
                 }
                 // delete its
-$               cache_list.erase ( std::remove( cache_list.begin(), cache_list.end(), max_irr_element ), cache_list.end() );
+                cache_storage.erase ( std::remove( cache_storage.begin(), cache_storage.end(), max_irr_element ), cache_storage.end() );
                 cache_hash_table.erase( cache_hash_table.find ( max_irr_element ) ); 
-                assert ( search_in_cache_hash_table ( max_irr_element ) == -1 ); //
-$
+
                 // insert in cache_list one
-                cache_list.push_back ( element );
+                cache_storage.push_back ( element );
                 cache_hash_table.emplace ( element, element_recency );
-                assert ( search_in_cache_hash_table ( element ) != -1 );
             }
             else {
                 cache_hash_table[element] = element_recency;
@@ -141,27 +122,26 @@ private:
     {
         typename std::unordered_map< T, std::deque<int>>::iterator elem_iterator = data_hash_table.find ( desired_elem ); 
         if ( elem_iterator == data_hash_table.end () ) { return nullptr; }
-$
+
         return &(elem_iterator->second);
     } 
 
-    int search_in_cache_hash_table ( T desired_elem )
+    auto search_in_cache_hash_table ( T desired_elem )
     {
         typename std::unordered_map< T, int>::iterator elem_iterator = cache_hash_table.find ( desired_elem ); 
-        if ( elem_iterator == cache_hash_table.end () ) { return -1; }
-$
-        return elem_iterator->second;
+ 
+        return elem_iterator;
     } 
 
     T get_element_with_max_recency () 
     {
         int max_recency = 0;
         T max_recency_element = 0;
-        typename std::vector<T>::iterator element_iterator = cache_list.begin();
+        typename std::vector<T>::iterator element_iterator = cache_storage.begin();
 
-        for ( size_t i = 0, size = cache_list.size(); i < size; ++i ) {
+        for ( size_t i = 0, size = cache_storage.size(); i < size; ++i ) {
             T current_element = *element_iterator;
-            int current_recency = search_in_cache_hash_table ( current_element );
+            int current_recency = search_in_cache_hash_table( current_element )->second;
             if ( current_recency == MAX_IRR ) {
                 return current_element;
             }
