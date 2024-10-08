@@ -1,6 +1,6 @@
 #include "ideal.hpp"
 
-int main ( int argc, char* argv[] ) 
+int main () 
 {
     using key_type = int;
     using page_type = key_type;
@@ -22,11 +22,7 @@ int main ( int argc, char* argv[] )
     }
     Cache_c<key_type, page_type> cache { capacity, elements_number };
 
-    if ( cache.reading_data () != NO_ERRORS ) {
-        std::cout << "Cache ctor error \n";
-
-        return EXIT_FAILURE;
-    }
+    cache.reading_data (); 
     size_t output = cache.cache_processing ();
     cache.output ( output );
 

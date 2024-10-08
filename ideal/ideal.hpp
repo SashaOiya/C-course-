@@ -6,17 +6,9 @@
 #include <cassert>
 #include <utility>
 #include <algorithm>
-#include <fstream>
-#include <ctime>
 #include <deque>
 #include <vector>
 #include <list>
-
-enum errors {
-    NO_ERRORS = 0,
-    CACHE_SIZE_ERR = 1,
-    READ_FILE_ERR = 2
-};
 
 template <typename T, typename U>
 class Cache_c {
@@ -34,7 +26,7 @@ class Cache_c {
 public :
     Cache_c ( size_t capacity, size_t elements_number ) : capacity( capacity ), elements_number ( elements_number ) {};
 
-    errors reading_data () 
+    void reading_data () 
     {
         data_hash_table.reserve ( elements_number );
         assert ( cache_storage.max_size() > capacity );
@@ -54,8 +46,6 @@ public :
             element_pointer->push_back ( i );
             data_vector.push_back ( new_element );
         }
-
-        return NO_ERRORS;
     }
 
     void output ( const int output ) 
