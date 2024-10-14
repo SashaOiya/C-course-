@@ -11,7 +11,7 @@
 // + slow_get_page
 
 template <typename T, typename U>
-class Cache_c {
+class IdealCache {
     std::deque<T> data_storage;
                             // data, cells
     std::unordered_map< T, std::deque<int> > data_hash_table;
@@ -24,7 +24,7 @@ class Cache_c {
 
 public :
     //template <typename It> // typename -> std::input_iterator
-    Cache_c ( size_t capacity, size_t elements_number/*, It from, It to*/ ) 
+    IdealCache ( size_t capacity, size_t elements_number/*, It from, It to*/ ) 
             : capacity_( capacity ), elements_number_ ( elements_number )/*, data_vector(from, to)*/
     {
         data_hash_table.reserve ( elements_number_ );
@@ -44,19 +44,17 @@ public :
         auto begin_itt = data_storage.begin();
 
         for ( int itt_counter = 0; begin_itt + itt_counter != data_storage.end(); ++itt_counter ) {
-            hits += ( lookup_update ( begin_itt[itt_counter] ) ? 1 : 0 );
+            hits += lookup_update ( begin_itt[itt_counter] );
         }
 
         return hits;
     }
 
 private:
-    const int MAX_IRR = elements_number_ + 1; // remove
-
-    bool lookup_update ( T &key ) 
+    bool lookup_update ( const T &key ) 
     {
         auto &element_vector = data_hash_table[key]; 
-        size_t element_recency = ( element_vector.size() == 1 ) ? MAX_IRR : element_vector[1] - element_vector[0] - 1;
+        size_t element_recency = ( element_vector.size() == 1 ) ? elements_number_ + 1 : element_vector[1] - element_vector[0] - 1;
         data_hash_table[key].pop_front();
 
         if ( cache_hash_table.find( key ) != cache_hash_table.end() ) { 
@@ -64,7 +62,7 @@ private:
 
             return true; 
         }
-        else if ( (data_hash_table.find(key)->second).size() == 0 ) { return false; }
+        else if ( (data_hash_table.find(key)->second).empty() ) { return false; }
 
         if ( cache_storage.size() < capacity_ ) {
             cache_storage.push_back ( key );
@@ -72,11 +70,11 @@ private:
 
             return false;
         } 
-        auto [max_irr_it, max_recency] = get_element_with_max_recency ();
+        auto [max_recency_it, max_recency] = get_element_with_max_recency ();
         if ( ( max_recency <= element_recency ) ) { return false; }
 
-        cache_storage.erase ( max_irr_it );
-        cache_hash_table.erase( *max_irr_it );
+        cache_hash_table.erase( *max_recency_it );
+        cache_storage.erase ( max_recency_it );
         cache_storage.push_back ( key );
         cache_hash_table.emplace ( key, element_recency );
 
@@ -91,8 +89,9 @@ private:
   
         for (auto ite = cache_storage.end(); it != ite; ++it) {
             int current_recency = cache_hash_table[*it];
-            if ( current_recency == MAX_IRR ) { 
-                return std::pair{it, MAX_IRR}; 
+            if ( current_recency == elements_number_ + 1 ) { 
+                max_recency = elements_number_ + 1;
+                return std::pair{it, max_recency}; 
             }
             else if ( current_recency > max_recency ) { 
                 max_recency = current_recency;

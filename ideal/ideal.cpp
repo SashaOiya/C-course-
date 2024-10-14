@@ -24,7 +24,7 @@ int main ()
     keys.reserve(elements_number);*/
     // ....
 
-    Cache_c<key_type, page_type> cache { capacity, elements_number/*, keys.begin(), keys.end() */};
+    IdealCache<key_type, page_type> cache { capacity, elements_number/*, keys.begin(), keys.end() */};
     std::cout << cache.processing();
 
     return 0;
