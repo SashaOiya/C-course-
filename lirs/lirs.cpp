@@ -1,7 +1,5 @@
 #include "lirs.hpp"
 
-#define NDEBUG
-
 int main ()
 {
     using key_type = int;
@@ -22,9 +20,17 @@ int main ()
 
         return EXIT_FAILURE;
     }
-    Cache_c<key_type, page_type> cache {capacity, elements_number};
 
-    int output = cache.process_data ();
+    LirsCache<key_type, page_type> cache {capacity, elements_number};
+
+    int output = 0;
+    key_type key = 0;
+    for ( size_t i = 0; i < elements_number; ++i ) { 
+        std::cin >> key;
+        output += cache.lookup_update(key);
+    }
+    output = elements_number - output;
+
     std::cout << output << '\n';
     
     return 0;
