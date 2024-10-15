@@ -8,8 +8,6 @@
 #include <deque>
 #include <list>
 
-// + slow_get_page
-
 template <typename T, typename U>
 class IdealCache {
     std::deque<T> data_storage;
@@ -23,34 +21,18 @@ class IdealCache {
     size_t elements_number_ = 0;
 
 public :
-    //template <typename It> // typename -> std::input_iterator
-    IdealCache ( size_t capacity, size_t elements_number/*, It from, It to*/ ) 
-            : capacity_( capacity ), elements_number_ ( elements_number )/*, data_vector(from, to)*/
+    using itt = typename std::deque<T>::iterator;
+    IdealCache ( size_t capacity, size_t elements_number, itt from, itt to ) 
+            : capacity_( capacity ), elements_number_ ( elements_number )
     {
         data_hash_table.reserve ( elements_number_ );
 
-        for ( size_t i = 0; i < elements_number_; ++i ) {
-            T new_element = 0;
-            std::cin >> new_element;
-            data_storage.push_back ( new_element );
-            data_hash_table[new_element].push_back(i);
+        for ( size_t i = 0; from != to; ++from, ++i ) {
+            std::fill_n(std::back_inserter(data_storage), 1, *from );
+            data_hash_table[*from].push_back(i);
         }
     }
 
-    //void reading_data () // divide into a part that reads data from stdin and a part that changes the state of the cache
-    size_t processing () 
-    {
-        size_t hits = 0;
-        auto begin_itt = data_storage.begin();
-
-        for ( int itt_counter = 0; begin_itt + itt_counter != data_storage.end(); ++itt_counter ) {
-            hits += lookup_update ( begin_itt[itt_counter] );
-        }
-
-        return hits;
-    }
-
-private:
     bool lookup_update ( const T &key ) 
     {
         auto &element_vector = data_hash_table[key]; 
@@ -80,6 +62,8 @@ private:
 
         return false;
     }
+
+private:
 
     auto get_element_with_max_recency ()
     {
