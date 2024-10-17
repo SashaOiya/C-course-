@@ -1,22 +1,25 @@
+add_executable(lirs_test
+			   lirs_test.cpp)
+			   
 set(TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
 add_definitions(-DTEST_DATA_DIR=\"${TEST_DATA_DIR}\")
 
-find_package(GTest REQUIRED)
-
-add_executable(lirs_test
-			   lirs_test.cpp
-			   main.cpp)
-
-target_compile_options(lirs_test PRIVATE -O2)
-
-target_link_libraries(lirs_test
-					  GTest::GTest
-					  GTest::Main)
-
-target_include_directories(lirs_test PRIVATE
-	                       ${CMAKE_SOURCE_DIR}/unit_test/funcs
-	                       ${CMAKE_SOURCE_DIR}/lirs
+set_target_properties(lirs_test PROPERTIES 
+	CXX_STANDART 20
+	CXX_STANDARD_REQUIRED ON
+	CXX_EXTENSIONS OFF
 )
 
-enable_testing()
-add_test(NAME LirsTest COMMAND lirs_test)
+target_link_libraries(lirs_test PRIVATE
+					  GTest::GTest
+					  GTest::gtest_main)
+
+message(STATUS "DIR: ${PROJECT_SOURCE_DIR}")
+
+target_include_directories(lirs_test PRIVATE
+					       ${PROJECT_SOURCE_DIR}/lirs
+					       ${PROJECT_SOURCE_DIR}/ideal
+					       ${PROJECT_SOURCE_DIR}/unit_test/func)
+
+include(GoogleTest)
+gtest_discover_tests(lirs_test)

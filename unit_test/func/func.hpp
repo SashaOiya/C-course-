@@ -4,20 +4,24 @@
 #include <string>
 #include <fstream>
 
+#include <filesystem>
 #include <gtest/gtest.h>
 
-#include "lirs/lirs.hpp"
+#include "lirs.hpp"
 #include "ideal.hpp"
 
 namespace test_funcs
 {
-	std::string get_result ( const std::string& filename, bool ideal )
+	inline std::string get_result ( const std::string& filename, bool ideal )// use std::istringstream instead of std::ifstream
     {
+        using key_type = int;
+        using page_type = key_type;
+        
         int hits = 0;
         std::ifstream file(filename);
         if (!file)
         {
-            std::cout << "error\n";
+            std::cout << "error open file\n";
             exit(1);
         }
 
@@ -37,22 +41,20 @@ namespace test_funcs
             exit(1);
         }
 
-        if ( ideal ) {
+        if ( ideal == true ) {
             std::deque<key_type> key_storage = {}; 
             for ( size_t i = 0; i < elements_number; ++i ) {
                 key_type key = 0;
-                std::cin >> key;
+                file >> key;
                 key_storage.push_back ( key );
             }
 
             IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), (key_storage.end()) };
-            size_t hits = 0;
             auto begin_itt = key_storage.begin();
 
             for ( int itt_counter = 0; begin_itt + itt_counter != key_storage.end(); ++itt_counter ) {
                 hits += cache.lookup_update ( begin_itt[itt_counter] );
             }
-            std::cout << hits << '\n';
         }
         else  {
             LirsCache<int, int> cache {capacity, elements_number};
@@ -60,9 +62,9 @@ namespace test_funcs
             int key = 0;
             for ( size_t i = 0; i < elements_number; ++i ) { 
                 file >> key;
-                output += cache.lookup_update(key);
+                hits += cache.lookup_update(key);
             }
-            hits = elements_number - output;
+            hits = elements_number - hits;
         }
         file.close();
 
@@ -86,12 +88,21 @@ namespace test_funcs
 		std::string test_directory = "/test/";
 
 		std::string test_path = std::string ( TEST_DATA_DIR ) + test_directory + test_name;
-		std::string result    = get_result ( test_path + ".txt", ideal );
+		std::string result    = get_result ( test_path + ".dat", ideal );
 
-        std::string answer_type = ideal ? "_ideal.txt" : "_lirs.txt";
+        std::string answer_type = ideal ? "_ideal.ans" : "_lirs.ans";
 
 		std::string answer = get_answer ( test_path + answer_type );
 
 		EXPECT_EQ(result, answer);
+
+
+        /*std::string str{"result: "};
+        str += std::to_string(42);
+        str += '\n';
+
+        std::istringstream ss;
+        ss << "result: " << 42 << '\n';
+        str = ss.str();*/
 	}
 }

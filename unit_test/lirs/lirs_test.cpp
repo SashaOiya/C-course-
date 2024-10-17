@@ -1,22 +1,19 @@
-#include <fstream>
-#include <string>
-
 #include <gtest/gtest.h>
 
-#include "lirs.hpp"
 #include "func.hpp"
 
-TEST(test1, cache2_data13)
+TEST(test1, data)
 {
-	test_funcs::run_test("data", false);
+	test_funcs::run_test("/test1/data", false );
 }
 
-TEST(test2, cache10_data101)
+TEST(test2, data2)
 {
-	test_funcs::run_test("data2", false);
+	test_funcs::run_test("/test2/data2", false);
 }
 
-TEST(test3, cache2_data5)
+TEST(test4, data4)
 {
-	test_funcs::run_test("data4", false);
+	test_funcs::run_test("/test4/data4", false);
 }
+

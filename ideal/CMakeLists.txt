@@ -1,20 +1,7 @@
-cmake_minimum_required(VERSION 3.11)
+add_executable(ideal ideal.cpp)
 
-project("ideal_cache")
-
-set(SOURCES
-        ideal.cpp
-)
-set (HEADERS
-        ideal.hpp
-)
-
-add_executable(ideal ${SOURCES} ${HEADERS})
-
-option(MyOption "MyOption" OFF)
-
-set_target_properties(
-        ideal PROPERTIES 
-        CXX_STANDART 20
-        CXX_STANDARD_REQUIRED ON
+set_target_properties(ideal PROPERTIES 
+    CXX_STANDART 20
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
 )

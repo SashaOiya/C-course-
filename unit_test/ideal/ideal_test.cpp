@@ -1,23 +1,18 @@
-#include <fstream>
-#include <string>
-
 #include <gtest/gtest.h>
 
-#include "ideal.hpp"
 #include "func.hpp"
 
-TEST(test1, cache2_data13)
+TEST(test1, data)
 {
-	test_funcs::run_test("data", true);
+	test_funcs::run_test("/test1/data", true);
 }
 
-TEST(test2, cache10_data100)
+TEST(test2, data2)
 {
-	test_funcs::run_test("data2", true);
+	test_funcs::run_test("/test2/data2", true);
 }
 
-TEST(test3, cache2_data5)
+TEST(test4, data4)
 {
-	test_funcs::run_test("data4", true);
+	test_funcs::run_test("/test4/data4", true);
 }
-
