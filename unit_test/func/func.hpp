@@ -17,30 +17,18 @@ namespace test_funcs
         using key_type = int;
         using page_type = key_type;
         
-        int hits = 0;
         std::ifstream file(filename);
-        if (!file)
-        {
-            std::cout << "error open file\n";
-            exit(1);
-        }
+        if (!file) { throw "Error open file\n"; }
 
         size_t capacity = 0;
         file >> capacity;
-        if ( !std::cin.good() ) {
-            std::cerr << "Error while reading the capacity of cache\n";
-
-            exit(1);
-        }
+        if ( !file.good() ) { throw "Error while reading the capacity of cache\n"; }
         
         size_t elements_number = 0;
         file >> elements_number;
-        if ( !std::cin.good() ) {
-            std::cerr << "Error while reading the number of elements\n";
+        if ( !file.good() ) { throw "Error while reading the number of elements\n"; }
 
-            exit(1);
-        }
-
+        int hits = 0;
         if ( ideal == true ) {
             std::deque<key_type> key_storage = {}; 
             for ( size_t i = 0; i < elements_number; ++i ) {
@@ -49,10 +37,10 @@ namespace test_funcs
                 key_storage.push_back ( key );
             }
 
-            IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), (key_storage.end()) };
-            auto begin_itt = key_storage.begin();
+            IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), key_storage.end() };
+            auto begin_itt = key_storage.begin(), end_itt = key_storage.end();
 
-            for ( int itt_counter = 0; begin_itt + itt_counter != key_storage.end(); ++itt_counter ) {
+            for ( int itt_counter = 0; begin_itt + itt_counter != end_itt; ++itt_counter ) {
                 hits += cache.lookup_update ( begin_itt[itt_counter] );
             }
         }
@@ -64,9 +52,7 @@ namespace test_funcs
                 file >> key;
                 hits += cache.lookup_update(key);
             }
-            hits = elements_number - hits;
         }
-        file.close();
 
         return std::to_string(hits);
     }
@@ -77,8 +63,6 @@ namespace test_funcs
 
         std::string answer;
         answer_file >> answer;
-
-        answer_file.close();
 
         return answer;
     }
@@ -91,18 +75,8 @@ namespace test_funcs
 		std::string result    = get_result ( test_path + ".dat", ideal );
 
         std::string answer_type = ideal ? "_ideal.ans" : "_lirs.ans";
-
 		std::string answer = get_answer ( test_path + answer_type );
 
 		EXPECT_EQ(result, answer);
-
-
-        /*std::string str{"result: "};
-        str += std::to_string(42);
-        str += '\n';
-
-        std::istringstream ss;
-        ss << "result: " << 42 << '\n';
-        str = ss.str();*/
 	}
 }

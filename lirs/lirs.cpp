@@ -7,19 +7,11 @@ int main ()
 
     size_t capacity = 0;
     std::cin >> capacity;
-    if ( !std::cin.good() ) {
-        std::cerr << "Error while reading the capacity of cache\n";
-
-        return EXIT_FAILURE;
-    }
+    if ( !std::cin.good() ) { throw "Error while reading the capacity of cache\n"; }
     
     size_t elements_number = 0;
     std::cin >> elements_number;
-    if ( !std::cin.good() ) {
-        std::cerr << "Error while reading the number of elements\n";
-
-        return EXIT_FAILURE;
-    }
+    if ( !std::cin.good() ) { throw "Error while reading the number of elements\n"; }
 
     LirsCache<key_type, page_type> cache {capacity, elements_number};
 
@@ -29,7 +21,6 @@ int main ()
         std::cin >> key;
         output += cache.lookup_update(key);
     }
-    output = elements_number - output;
 
     std::cout << output << '\n';
     

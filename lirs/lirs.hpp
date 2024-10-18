@@ -7,8 +7,8 @@
 #include <fstream>
 #include <iterator>
 
-const int SINGLE_CACHE_SIZE = 1;
-const int LAST_ELEMENT      = 1;
+const int kSingleCacheSize = 1;
+const int kLastElement     = 1;
 
 enum data_type {
     no_type              = 0,
@@ -19,7 +19,7 @@ enum data_type {
 
 template <typename T>
 struct list_data_s {
-    T data = 0; 
+    T data; 
     data_type type = no_type;
     bool place_in_cache_list = false;
     typename std::list<T>::iterator cache_iterator = {};
@@ -44,18 +44,18 @@ public:
         cache_hash_table.reserve ( elements_number );
     }
 
-    bool lookup_update ( const T element ) 
+    bool lookup_update ( const T key ) 
     {
-        auto hash_elem_pointer = search_elem_in_cache ( element ); 
+        auto hash_elem_pointer = search_elem_in_cache ( key ); 
 
         if ( !hash_elem_pointer ) {
-            cache_list.push_back ( element ); 
-            hir_list.push_back ( element ); 
-            list_data_s<T> temp_list_elem = {element, hir_resident_type, true, --(cache_list.end()), --(hir_list.end())  };
-            cache_hash_table.try_emplace ( element, temp_list_elem );
+            cache_list.push_back ( key ); 
+            hir_list.push_back ( key ); 
+            list_data_s<T> temp_list_elem = {key, hir_resident_type, true, std::prev(cache_list.end()), std::prev(hir_list.end())  };
+            cache_hash_table.try_emplace ( key, temp_list_elem );
             clear_hir_list(); 
 
-            return true; 
+            return false; 
         }
         else {
             const data_type &elem_type = hash_elem_pointer->type;
@@ -66,11 +66,11 @@ public:
                     hash_elem_pointer->place_in_cache_list = true;
 
                     cache_list.push_back ( hash_elem );
-                    hash_elem_pointer->cache_iterator = std::prev( cache_list.end(), LAST_ELEMENT );
+                    hash_elem_pointer->cache_iterator = std::prev( cache_list.end(), kLastElement );
 
                     hir_list.erase ( hash_elem_pointer->hir_iterator ); 
                     hir_list.push_back ( hash_elem );
-                    hash_elem_pointer->hir_iterator = std::prev( hir_list.end(), LAST_ELEMENT );
+                    hash_elem_pointer->hir_iterator = std::prev( hir_list.end(), kLastElement );
                 }
                 else {
                     hash_elem_pointer->type = lir_type;
@@ -84,7 +84,7 @@ public:
             else if ( elem_type == lir_type ) {  
                 cache_list.erase ( hash_elem_pointer->cache_iterator ); 
                 cache_list.push_back ( hash_elem );
-                hash_elem_pointer->cache_iterator = std::prev( cache_list.end(), LAST_ELEMENT );
+                hash_elem_pointer->cache_iterator = std::prev( cache_list.end(), kLastElement );
                 clear_cache_list ();
             }  
             else if ( elem_type == hir_no_resident_type ) {
@@ -96,7 +96,7 @@ public:
                 clear_hir_list();
             }
         }
-        return false;
+        return true;
     }
 
 private:
@@ -118,17 +118,17 @@ private:
 
     void lir_size_control ( const T element ) 
     {
-        if ( cache_list.size() > SINGLE_CACHE_SIZE ) { 
+        if ( cache_list.size() > kSingleCacheSize ) { 
             list_data_s<T> *data_pointer = search_elem_in_cache ( element );
             cache_list.erase ( data_pointer->cache_iterator ); 
             cache_list.push_back ( element );
-            data_pointer->cache_iterator = std::prev( cache_list.end(), LAST_ELEMENT );
+            data_pointer->cache_iterator = std::prev( cache_list.end(), kLastElement  );
 
-            if ( currennt_lir_n == lir_size + SINGLE_CACHE_SIZE ) {
+            if ( currennt_lir_n == lir_size + kSingleCacheSize ) {
                 search_elem_in_cache ( cache_list.front() )->type = hir_resident_type; 
                 --(currennt_lir_n);
                 hir_list.push_back ( cache_list.front() );
-                search_elem_in_cache ( cache_list.front() )->hir_iterator = std::prev( hir_list.end(), LAST_ELEMENT );
+                search_elem_in_cache ( cache_list.front() )->hir_iterator = std::prev( hir_list.end(), kLastElement );
             }
         }
         clear_cache_list();
@@ -161,7 +161,7 @@ private:
 
     void clear_hir_list ()
     {
-        if ( hir_list.size () == hir_size + SINGLE_CACHE_SIZE ) {
+        if ( hir_list.size () == hir_size + kSingleCacheSize ) {
             list_data_s<T> *no_resident_hir_pointer = search_elem_in_cache ( hir_list.front() );
             hir_list.pop_front ();
             
