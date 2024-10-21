@@ -7,17 +7,29 @@ int main ()
 
     size_t capacity = 0;
     std::cin >> capacity;
-    if ( !std::cin.good() ) { throw "Error while reading the capacity of cache\n"; }
+    if ( !std::cin.good() ) { 
+        std::cout << "Error while reading the capacity of cache\n"; 
+
+        return EXIT_FAILURE;
+    }
     
     size_t elements_number = 0;
     std::cin >> elements_number;
-    if ( !std::cin.good() ) { throw "Error while reading the number of elements\n"; }
+    if ( !std::cin.good() ) { 
+        std::cout << "Error while reading the number of elements\n";
+
+        return EXIT_FAILURE;
+    }
 
     std::deque<key_type> key_storage = {}; // vector
     for ( size_t i = 0; i < elements_number; ++i ) {
         key_type key = 0;
         std::cin >> key;
-        key_storage.push_back ( key );
+        if ( !std::cin.good() ) { key_storage.push_back ( key ); }
+        else { 
+            std::cout << "Error while reading key\n";
+            return EXIT_FAILURE;
+        }
     }
 
     IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), (key_storage.end()) };

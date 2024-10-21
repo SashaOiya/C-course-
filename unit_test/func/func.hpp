@@ -71,6 +71,7 @@ namespace test_funcs
 	{
 		std::string test_directory = "/test/";
 
+        std::cout << TEST_DATA_DIR << "\n";
 		std::string test_path = std::string ( TEST_DATA_DIR ) + test_directory + test_name;
 		std::string result    = get_result ( test_path + ".dat", ideal );
 

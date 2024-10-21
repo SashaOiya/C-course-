@@ -2,7 +2,10 @@ add_executable(lirs_test
 			   lirs_test.cpp)
 			   
 set(TEST_DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../")
-add_definitions(-DTEST_DATA_DIR=\"${TEST_DATA_DIR}\")
+
+target_compile_definitions(lirs_test PUBLIC
+						   -DTEST_DATA_DIR="${TEST_DATA_DIR}")
+
 
 set_target_properties(lirs_test PROPERTIES 
 	CXX_STANDART 20
