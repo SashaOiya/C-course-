@@ -3,7 +3,6 @@
 Склонируйте репозиторий, перейдите в папку с ним.
 Сборка проекта:
 ```sh
-touch CMakeLists.txt
 mkdir build
 cd build/
 ```
@@ -12,6 +11,7 @@ cd build/
 cmake ..
 make
 ```
+Чтобы запустить мои unit tests, вам понадобится установить Google Tests.
 
 # Как с этим работать 
 ## Тесты :
