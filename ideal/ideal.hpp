@@ -8,6 +8,8 @@
 #include <deque>
 #include <list>
 
+namespace cachei {
+
 template <typename T, typename U>
 class IdealCache {
     std::deque<T> data_storage;
@@ -17,12 +19,12 @@ class IdealCache {
     std::unordered_map< T, int> cache_hash_table;
     std::list<T> cache_storage;      
 
-    size_t capacity_ = 0; 
-    size_t elements_number_ = 0;
+    int capacity_ = 0; 
+    int elements_number_ = 0;
 
 public :
     using itt = typename std::deque<T>::iterator;
-    IdealCache ( size_t capacity, size_t elements_number, itt from, itt to ) 
+    IdealCache ( int capacity, int elements_number, itt from, itt to ) 
             : capacity_( capacity ), elements_number_ ( elements_number )
     {
         data_hash_table.reserve ( elements_number_ );
@@ -65,7 +67,7 @@ public :
 
 private:
 
-    auto get_element_with_max_recency ()
+    auto get_element_with_max_recency () 
     {
         int max_recency = -1;
         auto it = cache_storage.begin();
@@ -85,3 +87,5 @@ private:
         return std::pair{max_recency_it, max_recency};
     }
 };
+
+}

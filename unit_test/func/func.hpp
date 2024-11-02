@@ -20,11 +20,11 @@ namespace test_funcs
         std::ifstream file(filename);
         if (!file) { throw "Error open file\n"; }
 
-        size_t capacity = 0;
+        int capacity = 0;
         file >> capacity;
         if ( !file.good() ) { throw "Error while reading the capacity of cache\n"; }
         
-        size_t elements_number = 0;
+        int elements_number = 0;
         file >> elements_number;
         if ( !file.good() ) { throw "Error while reading the number of elements\n"; }
 
@@ -37,7 +37,7 @@ namespace test_funcs
                 key_storage.push_back ( key );
             }
 
-            IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), key_storage.end() };
+            cachei::IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), key_storage.end() };
             auto begin_itt = key_storage.begin(), end_itt = key_storage.end();
 
             for ( int itt_counter = 0; begin_itt + itt_counter != end_itt; ++itt_counter ) {
@@ -45,7 +45,7 @@ namespace test_funcs
             }
         }
         else  {
-            LirsCache<int, int> cache {capacity, elements_number};
+            cachel::LirsCache<int, int> cache {capacity, elements_number};
 
             int key = 0;
             for ( size_t i = 0; i < elements_number; ++i ) { 
