@@ -32,7 +32,7 @@ public :
         data_hash_table.reserve ( elements_number_ );
 
         for ( size_t i = 0; from != to; ++from, ++i ) {
-            std::fill_n(std::back_inserter(data_storage), 1, *from );
+            data_storage.push_back(*from);
             data_hash_table[*from].push_back(i);
         }
     }
