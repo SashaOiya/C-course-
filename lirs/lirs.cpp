@@ -1,3 +1,4 @@
+#include <iostream>
 #include "lirs.hpp"
 
 int main ()
@@ -7,15 +8,15 @@ int main ()
 
     int capacity = 0;
     std::cin >> capacity;
-    if ( !std::cin.good() || capacity <= 0 )  { 
-        std::cout << "Error while reading the capacity of cache\n"; 
+    if ( !std::cin.good() || capacity <= 0 )  {
+        std::cout << "Error while reading the capacity of cache\n";
 
         return EXIT_FAILURE;
     }
-    
+
     int elements_number = 0;
     std::cin >> elements_number;
-    if ( !std::cin.good() || elements_number < 0 ) { 
+    if ( !std::cin.good() || elements_number < 0 ) {
         std::cout << "Error while reading the number of elements\n";
 
         return EXIT_FAILURE;
@@ -25,16 +26,16 @@ int main ()
 
     int output = 0;
     key_type key = 0;
-    for ( size_t i = 0; i < elements_number; ++i ) { 
+    for ( size_t i = 0; i < elements_number; ++i ) {
         std::cin >> key;
-        if ( std::cin.good() ) { output += cache.lookup_update(key); } 
-        else { 
+        if ( std::cin.good() ) { output += cache.lookup_update(key); }
+        else {
             std::cout << "Error while reading key\n";
             return EXIT_FAILURE;
         }
     }
 
     std::cout << output << '\n';
-    
+
     return 0;
 }

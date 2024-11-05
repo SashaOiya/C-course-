@@ -1,12 +1,12 @@
 #pragma once
 
-#include <iostream>
 #include <unordered_map>
 #include <cassert>
 #include <utility>
 #include <algorithm>
 #include <deque>
 #include <list>
+#include <functional>
 
 namespace cachei {
 
@@ -17,15 +17,17 @@ class IdealCache {
     std::unordered_map< T, std::deque<int> > data_hash_table;
                       // data, irr
     std::unordered_map< T, int> cache_hash_table;
-    std::list<T> cache_storage;      
+    std::list<T> cache_storage;
 
-    int capacity_ = 0; 
+    std::function<T(T)> slow_get_page_ {};
+
+    int capacity_ = 0;
     int elements_number_ = 0;
 
 public :
     using itt = typename std::deque<T>::iterator;
-    IdealCache ( int capacity, int elements_number, itt from, itt to ) 
-            : capacity_( capacity ), elements_number_ ( elements_number )
+    IdealCache ( int capacity, int elements_number, itt from, itt to, std::function<T(T)> slow_get_page_T )
+            : capacity_( capacity ), elements_number_ ( elements_number ), slow_get_page_(slow_get_page_T)
     {
         data_hash_table.reserve ( elements_number_ );
 
@@ -35,16 +37,17 @@ public :
         }
     }
 
-    bool lookup_update ( const T &key ) 
+    bool lookup_update ( const U &page )
     {
-        auto &element_vector = data_hash_table[key]; 
+        const T key = slow_get_page_( page );
+        auto &element_vector = data_hash_table[key];
         size_t element_recency = ( element_vector.size() == 1 ) ? elements_number_ + 1 : element_vector[1] - element_vector[0] - 1;
         data_hash_table[key].pop_front();
 
-        if ( cache_hash_table.find( key ) != cache_hash_table.end() ) { 
+        if ( cache_hash_table.find( key ) != cache_hash_table.end() ) {
             cache_hash_table[key] = element_recency;
 
-            return true; 
+            return true;
         }
         else if ( (data_hash_table.find(key)->second).empty() ) { return false; }
 
@@ -53,7 +56,7 @@ public :
             cache_hash_table.emplace ( key, element_recency );
 
             return false;
-        } 
+        }
         auto [max_recency_it, max_recency] = get_element_with_max_recency ();
         if ( ( max_recency <= element_recency ) ) { return false; }
 
@@ -67,19 +70,19 @@ public :
 
 private:
 
-    auto get_element_with_max_recency () 
+    auto get_element_with_max_recency () const
     {
         int max_recency = -1;
         auto it = cache_storage.begin();
-        auto max_recency_it = it; 
-  
+        auto max_recency_it = it;
+
         for (auto ite = cache_storage.end(); it != ite; ++it) {
-            int current_recency = cache_hash_table[*it];
-            if ( current_recency == elements_number_ + 1 ) { 
+            const int current_recency = cache_hash_table.find( *it )->second;
+            if ( current_recency == elements_number_ + 1 ) {
                 max_recency = elements_number_ + 1;
-                return std::pair{it, max_recency}; 
+                return std::pair{it, max_recency};
             }
-            else if ( current_recency > max_recency ) { 
+            if ( current_recency > max_recency ) {
                 max_recency = current_recency;
                 max_recency_it = it;
             }
