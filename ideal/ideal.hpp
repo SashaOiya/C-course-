@@ -17,9 +17,9 @@ class IdealCache {
     std::unordered_map< T, std::deque<int> > data_hash_table;
                       // data, irr
     std::unordered_map< T, int> cache_hash_table;
-    std::list<T> cache_storage;
+    std::list<U> cache_storage;
 
-    std::function<T(T)> slow_get_page_ {};
+    std::function<U(T)> slow_get_page_ {};
 
     int capacity_ = 0;
     int elements_number_ = 0;
@@ -37,22 +37,25 @@ public :
         }
     }
 
-    bool lookup_update ( const U &page )
+    bool lookup_update ( )
     {
-        const T key = slow_get_page_( page );
+        if ( data_storage.empty() ) throw "Empty storage";
+        auto key = std::move ( data_storage.front() );
+        data_storage.pop_front();
+
         auto &element_vector = data_hash_table[key];
         size_t element_recency = ( element_vector.size() == 1 ) ? elements_number_ + 1 : element_vector[1] - element_vector[0] - 1;
-        data_hash_table[key].pop_front();
+        element_vector.pop_front();
 
-        if ( cache_hash_table.find( key ) != cache_hash_table.end() ) {
+        if ( cache_hash_table.contains(key) ) {
             cache_hash_table[key] = element_recency;
 
             return true;
         }
-        else if ( (data_hash_table.find(key)->second).empty() ) { return false; }
+        else if ( element_vector.empty() ) { return false; }
 
         if ( cache_storage.size() < capacity_ ) {
-            cache_storage.push_back ( key );
+            cache_storage.push_back ( slow_get_page_ ( key ) );
             cache_hash_table.emplace ( key, element_recency );
 
             return false;
@@ -62,7 +65,7 @@ public :
 
         cache_hash_table.erase( *max_recency_it );
         cache_storage.erase ( max_recency_it );
-        cache_storage.push_back ( key );
+        cache_storage.push_back ( slow_get_page_ ( key ) );
         cache_hash_table.emplace ( key, element_recency );
 
         return false;

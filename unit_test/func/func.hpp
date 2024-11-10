@@ -10,12 +10,13 @@
 #include "lirs.hpp"
 #include "ideal.hpp"
 
+int slow_get_page_int ( int key )
+{
+    return key;
+}
+
 namespace test_funcs
 {
-    int slow_get_page_int ( int key )
-    {
-        return key;
-    }
 	inline std::string get_result ( const std::string& filename, bool ideal )// use std::istringstream instead of std::ifstream
     {
         using key_type = int;
@@ -42,17 +43,16 @@ namespace test_funcs
             }
 
             cachei::IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), key_storage.end(), slow_get_page_int };
-            auto begin_itt = key_storage.begin(), end_itt = key_storage.end();
 
-            for ( int itt_counter = 0; begin_itt + itt_counter != end_itt; ++itt_counter ) {
-                hits += cache.lookup_update ( begin_itt[itt_counter] );
+            for ( auto begin_itt = key_storage.begin(), end_itt = key_storage.end(); begin_itt != end_itt; ++begin_itt ) {
+                hits += cache.lookup_update ();
             }
         }
         else  {
             cachel::LirsCache<int, int> cache {capacity, elements_number};
 
             int key = 0;
-            for ( size_t i = 0; i < elements_number; ++i ) { 
+            for ( size_t i = 0; i < elements_number; ++i ) {
                 file >> key;
                 hits += cache.lookup_update(key);
             }

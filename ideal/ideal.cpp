@@ -31,7 +31,7 @@ int main ()
     for ( int i = 0; i < elements_number; ++i ) {
         key_type key = 0;
         std::cin >> key;
-        if ( !std::cin.good() ) { key_storage.push_back ( key ); }
+        if ( std::cin.good() ) { key_storage.push_back ( key ); }
         else {
             std::cout << "Error while reading key\n";
             return EXIT_FAILURE;
@@ -39,11 +39,10 @@ int main ()
     }
 
     cachei::IdealCache<key_type, page_type> cache { capacity, elements_number, key_storage.begin(), (key_storage.end()), slow_get_page_int };
-    auto begin_itt = key_storage.begin(), end_itt = key_storage.end();
 
     size_t hits = 0;
-    for ( int itt_counter = 0; begin_itt + itt_counter != end_itt; ++itt_counter ) {
-        hits += cache.lookup_update ( begin_itt[itt_counter] );
+    for ( auto begin_itt = key_storage.begin(), end_itt = key_storage.end(); begin_itt != end_itt; ++begin_itt ) {
+        hits += cache.lookup_update ();
     }
     std::cout << hits << '\n';
 

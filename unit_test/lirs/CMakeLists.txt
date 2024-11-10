@@ -8,7 +8,7 @@ target_compile_definitions(lirs_test PUBLIC
 
 
 set_target_properties(lirs_test PROPERTIES 
-	CXX_STANDART 20
+	CXX_STANDARD 20
 	CXX_STANDARD_REQUIRED ON
 	CXX_EXTENSIONS OFF
 )
